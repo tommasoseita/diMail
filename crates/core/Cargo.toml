@@ -1,0 +1,33 @@
+[package]
+name = "dimail-core"
+description = "Nucleo di diMail: sync Gmail, database locale, coda in uscita. Non dipende da Tauri."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ammonia = "4"
+anyhow.workspace = true
+base64.workspace = true
+chrono.workspace = true
+dirs.workspace = true
+encoding_rs.workspace = true
+futures.workspace = true
+getrandom = "0.3"
+html2text = "0.17"
+mailparse = "0.18"
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "http2", "json", "form", "query", "gzip", "charset", "system-proxy"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
+security-framework = "3"
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.11"
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+url = "2"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+tempfile = "3"

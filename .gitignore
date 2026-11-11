@@ -1,0 +1,38 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+dist-release
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Rust
+/target/
+
+# Credenziali OAuth e altri segreti: mai in git
+/secrets/
+
+# Database e dati locali (la posta sta in ~/Library/Application Support/Dimail, ma per sicurezza)
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
