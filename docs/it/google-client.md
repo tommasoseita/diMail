@@ -79,10 +79,18 @@ Con un client **Interno** basta farlo una volta per tutta l'azienda:
 
 1. Un amministratore del Workspace (o chi può creare progetti Google Cloud nell'organizzazione) segue
    i passi da 1 a 4 e scarica il JSON.
-2. Mette il file dove lo vedono solo i colleghi, per esempio in una cartella di Drive condivisa con
-   l'azienda.
-3. Ogni collega scarica diMail, al primo avvio sceglie quel file e preme **Accedi con Google** con
-   il suo account aziendale.
+2. Lo carica nella sua diMail, poi apre Impostazioni (⌘,) → Account Google e preme **Copia il link
+   di configurazione**. Il link comincia con `dimail://client` e porta dentro il client.
+3. Manda il link ai colleghi, nella chat aziendale o per email.
+4. Ogni collega installa diMail e apre il link: diMail si avvia, dice quale client imposta e chiede
+   conferma con **Configura**. Poi preme **Accedi con Google** con il suo account aziendale. Nessun
+   file da scaricare o scegliere.
+
+Se aprendo il link diMail non parte, apri prima diMail e incolla il link nella prima schermata con
+⌘V. Funziona anche condividere il file JSON: ogni collega lo sceglie al primo avvio.
+
+Il link contiene il client, come il file JSON: mandalo solo a chi deve usarlo. Aprire un link chiede
+sempre conferma, e se sostituisce un client già impostato lo dice prima.
 
 Un client Interno non ha bisogno della verifica di Google e non mostra avvisi al login. Funziona
 solo con gli account dell'organizzazione.

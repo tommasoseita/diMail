@@ -70,6 +70,35 @@ impl OAuthClient {
     }
 }
 
+/// Link di configurazione (11 novembre): `dimail://client?c=…`, con dentro il client. Chi ha creato
+/// il client lo copia dalle Impostazioni e lo manda ai colleghi; aprirlo configura diMail senza
+/// scaricare né scegliere il file JSON. Contiene il `client_secret`, come il file: per un'app desktop
+/// Google non lo considera un segreto, ma il link si condivide solo con chi deve usarlo.
+const SETUP_LINK: &str = "dimail://client";
+
+impl OAuthClient {
+    pub fn setup_link(&self) -> String {
+        let payload = serde_json::json!({ "i": self.client_id, "s": self.client_secret, "p": self.project_id });
+        format!("{SETUP_LINK}?c={}", b64url(payload.to_string().as_bytes()))
+    }
+
+    pub fn from_setup_link(link: &str) -> Result<OAuthClient> {
+        let bad = || Error::other("non è un link di configurazione di diMail");
+        let link = link.trim();
+        if link.len() > 4000 {
+            return Err(bad());
+        }
+        let rest = link.strip_prefix(SETUP_LINK).ok_or_else(bad)?;
+        let query = rest.trim_start_matches('/').strip_prefix('?').ok_or_else(bad)?;
+        let code = query.split('&').find_map(|kv| kv.strip_prefix("c=")).ok_or_else(bad)?;
+        let raw = b64url_decode(code).map_err(|_| bad())?;
+        let v: serde_json::Value = serde_json::from_slice(&raw).map_err(|_| bad())?;
+        // Gli stessi controlli del file JSON.
+        let as_file = serde_json::json!({ "installed": { "client_id": v.get("i"), "client_secret": v.get("s"), "project_id": v.get("p") } });
+        OAuthClient::from_google_json(&as_file.to_string())
+    }
+}
+
 impl std::fmt::Debug for OAuthClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("OAuthClient").field("client_id", &self.client_id).finish_non_exhaustive()
@@ -389,6 +418,26 @@ impl TokenManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn setup_link_round_trips_and_refuses_other_links() {
+        let c = OAuthClient { client_id: "123-abc.apps.googleusercontent.com".into(), client_secret: "GOCSPX-prova".into(), project_id: Some("posta-mia".into()) };
+        let link = c.setup_link();
+        assert!(link.starts_with("dimail://client?c="));
+        assert!(!link.contains("GOCSPX"), "il segreto non è leggibile a occhio nel link");
+        let back = OAuthClient::from_setup_link(&format!("  {link}\n")).unwrap();
+        assert_eq!((back.client_id, back.client_secret, back.project_id), (c.client_id.clone(), c.client_secret.clone(), c.project_id.clone()));
+        // macOS può aggiungere una barra prima della query.
+        assert!(OAuthClient::from_setup_link(&link.replace("client?", "client/?")).is_ok());
+        let no_project = OAuthClient { project_id: None, ..c.clone() };
+        assert_eq!(OAuthClient::from_setup_link(&no_project.setup_link()).unwrap().project_id, None);
+        for bad in ["https://esempio.it", "dimail://client", "dimail://client?c=", "dimail://client?c=%%%", "dimail://altro?c=abc"] {
+            assert!(OAuthClient::from_setup_link(bad).is_err(), "{bad}");
+        }
+        // Un client che non è di Google non passa.
+        let fake = OAuthClient { client_id: "123.example.com".into(), ..c };
+        assert!(OAuthClient::from_setup_link(&fake.setup_link()).is_err());
+    }
 
     #[test]
     fn reads_the_desktop_client_json_and_refuses_the_others() {

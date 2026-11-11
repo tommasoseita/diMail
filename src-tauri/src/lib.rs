@@ -176,6 +176,12 @@ async fn load_google_client(window: tauri::WebviewWindow, state: State<'_, AppSt
     }
     let raw = std::fs::read_to_string(&path).map_err(|e| Error::other(format!("il file non si legge: {e}")))?;
     let client = OAuthClient::from_google_json(&raw)?;
+    apply_client(&state, client).await.map(Some)
+}
+
+/// Salva il client nel Portachiavi e lo mette in uso. Se c'era un account in attesa del client
+/// riparte subito; con un client diverso da prima serve un nuovo accesso.
+async fn apply_client(state: &AppState, client: OAuthClient) -> CmdResult<GoogleClientInfo> {
     let previous = state.client.read().unwrap_or_else(|p| p.into_inner()).clone();
     let changed = previous.as_ref().is_some_and(|p| p.client_id != client.client_id);
     keychain::save_client(&client)?;
@@ -208,7 +214,42 @@ async fn load_google_client(window: tauri::WebviewWindow, state: State<'_, AppSt
         }
         state.set_runtime(None);
     }
-    Ok(Some(info))
+    Ok(info)
+}
+
+/// Il link di configurazione del client in uso, da mandare ai colleghi (Impostazioni → Account Google).
+#[tauri::command]
+fn client_setup_link(state: State<'_, AppState>) -> CmdResult<String> {
+    Ok(state.client()?.setup_link())
+}
+
+#[derive(Serialize)]
+struct SetupLinkInfo {
+    client_id: String,
+    project_id: Option<String>,
+    /// È lo stesso client già in uso: non c'è niente da fare.
+    same: bool,
+    /// C'è già un altro client: aprire il link lo sostituisce e richiede un nuovo accesso.
+    replaces: bool,
+}
+
+/// Cosa c'è in un link di configurazione, per chiedere conferma prima di usarlo. Il link non va mai nei log.
+#[tauri::command]
+fn setup_link_info(state: State<'_, AppState>, link: String) -> CmdResult<SetupLinkInfo> {
+    let client = OAuthClient::from_setup_link(&link)?;
+    let current = state.client.read().unwrap_or_else(|p| p.into_inner()).as_ref().map(|c| c.client_id.clone());
+    Ok(SetupLinkInfo {
+        same: current.as_deref() == Some(client.client_id.as_str()),
+        replaces: current.is_some_and(|id| id != client.client_id),
+        client_id: client.client_id,
+        project_id: client.project_id,
+    })
+}
+
+#[tauri::command]
+async fn apply_setup_link(state: State<'_, AppState>, link: String) -> CmdResult<GoogleClientInfo> {
+    let client = OAuthClient::from_setup_link(&link)?;
+    apply_client(&state, client).await
 }
 
 #[tauri::command]
@@ -571,6 +612,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(external_links())
         .manage(state)
         .setup(move |app| {
@@ -659,6 +701,9 @@ pub fn run() {
             login,
             google_client,
             load_google_client,
+            client_setup_link,
+            setup_link_info,
+            apply_setup_link,
             list_threads,
             count_threads,
             peek_thread,

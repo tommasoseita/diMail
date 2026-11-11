@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Finestra principale: comandi di diMail, apertura dei link nel browser, trascinamento della finestra dalla barra in alto, numero sull'icona nel Dock e zoom con ⌘+ e ⌘−, aggiornamenti automatici e riavvio",
+  "description": "Finestra principale: comandi di diMail, apertura dei link nel browser, trascinamento della finestra dalla barra in alto, numero sull'icona nel Dock e zoom con ⌘+ e ⌘−, aggiornamenti automatici e riavvio, link di configurazione dimail://",
   "windows": [
     "main"
   ],
@@ -12,6 +12,7 @@
     "core:window:allow-set-badge-count",
     "core:webview:allow-set-webview-zoom",
     "updater:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    "deep-link:default"
   ]
 }

@@ -73,8 +73,13 @@ More in [Troubleshooting](troubleshooting.md#signing-in-with-google).
 With an **Internal** client, you do this once for the whole company:
 
 1. A Workspace administrator, or someone who can create Google Cloud projects in the organization, follows steps 1 to 4, choosing **Internal** as the audience, and downloads the JSON. That is ONE client for everybody.
-2. They put the file where only colleagues can see it, for example a Drive folder shared with the company.
-3. Each colleague downloads diMail, chooses that file at the first launch and clicks **Accedi con Google** with their company account.
+2. They load it in their own diMail, then open **Impostazioni** (Settings, <kbd>⌘,</kbd>) › **Account Google** and click **Copia il link di configurazione** (Copy the setup link). The link starts with `dimail://client` and carries the client.
+3. They send the link to colleagues, in a company chat or by email.
+4. Each colleague installs diMail and opens the link: diMail starts, shows which client the link sets up and asks to confirm with **Configura** (Set up). Then they click **Accedi con Google** with their company account. No file to download or choose.
+
+If opening the link doesn't start diMail, open diMail first and paste the link on the first screen with <kbd>⌘V</kbd>. Sharing the JSON file instead also works: each colleague chooses it at the first launch.
+
+The link contains the client, like the JSON file does: share it only with the people who should use it. Opening a link always asks for confirmation, and replacing a client that is already set up says so first.
 
 An Internal client needs no verification by Google and shows no warning at sign-in. It works only with the organization's accounts. Each colleague still signs in for themselves: the file gives access to nobody's mail.
 

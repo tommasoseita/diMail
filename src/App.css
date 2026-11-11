@@ -760,7 +760,7 @@ button.ghost:hover { background: var(--hover); }
   padding: 8px 10px; outline: none;
 }
 .form-row select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent); }
-.check-line { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.check-line { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .check-line .grow { flex: 1; }
 .ok { color: var(--ok, #2f8f5b); }
 .domain-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }

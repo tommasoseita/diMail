@@ -2,6 +2,12 @@
 
 All notable changes to diMail. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [semantic versioning](https://semver.org).
 
+## 0.1.1
+
+### Added
+
+- **Setup link.** Whoever created the Google client copies a `dimail://client` link from **Impostazioni** › **Account Google** and sends it to colleagues: opening it sets diMail up with that client, after a confirmation, with no JSON file to download. See [For a company on Google Workspace](docs/google-client.md#for-a-company-on-google-workspace).
+
 ## 0.1.0
 
 The first public release: a Gmail client for the Mac that you drive from the keyboard. The interface is in Italian.

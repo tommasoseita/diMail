@@ -328,6 +328,21 @@ async function handle(cmd: string, a: Record<string, any>): Promise<unknown> {
       googleClient = { client_id: "987654-xyz.apps.googleusercontent.com", project_id: "posta-mia" };
       return googleClient;
     }
+    // Link di configurazione: nel finto backend il link porta il client "posta-aziendale".
+    case "client_setup_link": return "dimail://client?c=cG9zdGEtYXppZW5kYWxl";
+    case "setup_link_info": {
+      if (!String(a.link).startsWith("dimail://client?c=")) throw "non è un link di configurazione di diMail";
+      const client_id = "555000-org.apps.googleusercontent.com";
+      return { client_id, project_id: "posta-aziendale", same: googleClient?.client_id === client_id, replaces: !!googleClient && googleClient.client_id !== client_id };
+    }
+    case "apply_setup_link": {
+      await new Promise((r) => setTimeout(r, 300));
+      const changed = !!googleClient && googleClient.client_id !== "555000-org.apps.googleusercontent.com";
+      googleClient = { client_id: "555000-org.apps.googleusercontent.com", project_id: "posta-aziendale" };
+      if (changed) loggedIn = false;
+      return googleClient;
+    }
+    case "plugin:deep-link|get_current": return null;
     case "my_domains": {
       const suggested = ME.email.split("@")[1];
       return { domains: myDomains ?? [suggested], custom: myDomains !== null, suggested };

@@ -270,6 +270,32 @@ function GoogleSettings({ onChanged }: { onChanged: () => void }) {
     api.googleClient().then(setInfo).catch((e) => setError(String(e)));
   }, []);
 
+  const [copied, setCopied] = useState(false);
+  const copyLink = async () => {
+    setError(null);
+    try {
+      const link = await api.clientSetupLink();
+      try {
+        await navigator.clipboard.writeText(link);
+      } catch {
+        // Senza l'API degli appunti: il vecchio comando di copia, su un campo temporaneo.
+        const field = document.createElement("textarea");
+        field.value = link;
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        const ok = document.execCommand("copy");
+        field.remove();
+        if (!ok) throw new Error("non riesco a copiare negli appunti");
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (e) {
+      setError(String(e));
+    }
+  };
+
   const replace = async () => {
     setBusy(true);
     setError(null);
@@ -298,10 +324,12 @@ function GoogleSettings({ onChanged }: { onChanged: () => void }) {
       )}
       <div className="check-line">
         <button className="ghost" onClick={replace} disabled={busy}>{busy ? "Leggo il file…" : "Sostituisci il JSON"}</button>
+        {info && <button className="ghost" onClick={copyLink} title="Chi apre il link configura diMail con questo client, senza il file JSON">{copied ? "Link copiato" : "Copia il link di configurazione"}</button>}
         <span className="grow" />
         <button className="link-btn" onClick={() => openUrl(CLIENT_GUIDE).catch(() => {})}>Come si crea il client</button>
       </div>
       <p className="muted small">Con un client diverso dovrai rifare l'accesso a Google. La posta già scaricata resta.</p>
+      <p className="muted small">Il link di configurazione contiene il client, come il file JSON: mandalo solo ai colleghi che devono usare diMail. Ognuno accede poi con il proprio account.</p>
       {error && <p className="error small">{error}</p>}
     </div>
   );

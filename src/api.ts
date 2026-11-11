@@ -99,6 +99,8 @@ export type AppInfo = {
   needs_client: boolean;
 };
 export type GoogleClientInfo = { client_id: string; project_id: string | null };
+/** Cosa c'è in un link di configurazione: `same` se è il client già in uso, `replaces` se ne sostituisce un altro. */
+export type SetupLinkInfo = GoogleClientInfo & { same: boolean; replaces: boolean };
 
 export type View =
   | { kind: "inbox" }
@@ -210,6 +212,10 @@ export const api = {
   googleClient: () => invoke<GoogleClientInfo | null>("google_client"),
   /** Senza percorso apre il pannello di macOS; `null` se l'utente annulla. */
   loadGoogleClient: (path?: string) => invoke<GoogleClientInfo | null>("load_google_client", { path: path ?? null }),
+  /** Il link di configurazione del client in uso (`dimail://client?c=…`), da mandare ai colleghi. */
+  clientSetupLink: () => invoke<string>("client_setup_link"),
+  setupLinkInfo: (link: string) => invoke<SetupLinkInfo>("setup_link_info", { link }),
+  applySetupLink: (link: string) => invoke<GoogleClientInfo>("apply_setup_link", { link }),
   listThreads: (view: View, limit = 300, offset = 0) => invoke<ThreadSummary[]>("list_threads", { view, limit, offset }),
   countThreads: (view: View) => invoke<number>("count_threads", { view }),
   /** Come getThread, ma senza chiedere i corpi mancanti: per precaricare. */

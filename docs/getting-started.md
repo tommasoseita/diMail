@@ -10,7 +10,7 @@ This guide takes you from the download to a synced inbox. The app itself takes a
 - A Gmail or Google Workspace account.
 - The JSON file of a Google OAuth client:
   - **on your own**, you create it once by following [Creating your Google client](google-client.md);
-  - **in a company on Google Workspace**, an administrator creates one for everybody and shares the file with you ([how](google-client.md#for-a-company-on-google-workspace)).
+  - **in a company on Google Workspace**, an administrator creates one for everybody and sends you a setup link, or the file ([how](google-client.md#for-a-company-on-google-workspace)).
 - Optional: an API key from [Mistral](https://console.mistral.ai/api-keys) or [OpenAI](https://platform.openai.com/api-keys), to turn on the AI features.
 
 ## 1. Install
@@ -26,6 +26,7 @@ This guide takes you from the download to a synced inbox. The app itself takes a
 The first screen says **Benvenuto in diMail** (Welcome to diMail) and asks for the client's JSON file.
 
 - Click **Scegli il file JSON** (Choose the JSON file), or drag the file onto the window.
+- With a setup link from your company, open the link instead (or paste it here with <kbd>⌘V</kbd>) and confirm with **Configura** (Set up).
 - Don't have the file yet? **Come si crea il client** (How to create the client) opens the guide, in Italian. The English version is [Creating your Google client](google-client.md).
 
 diMail stores the client in the macOS Keychain. If the file is of the wrong kind, diMail says why: the usual cause is a client of type "Web application" instead of "Desktop app".

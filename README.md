@@ -41,7 +41,7 @@ and AI helps without deciding for you.
 
 - A Mac, Apple silicon or Intel, with a recent version of macOS.
 - A Gmail or Google Workspace account.
-- A Google OAuth client of your own. You create it once in the Google Cloud console, in about ten minutes: see [Creating your Google client](docs/google-client.md).
+- A Google OAuth client. On your own, you create it once in the Google Cloud console, in about ten minutes: see [Creating your Google client](docs/google-client.md). In a company on Google Workspace, one person creates it and sends everyone else a setup link: they open it, confirm and sign in ([how](docs/google-client.md#for-a-company-on-google-workspace)).
 - Optional, for the AI features: an API key from [Mistral](https://console.mistral.ai/api-keys) or [OpenAI](https://platform.openai.com/api-keys).
 
 > **The interface is in Italian only for now.** These docs quote each label in Italian, as it appears in the app, with its English meaning.
@@ -50,7 +50,7 @@ and AI helps without deciding for you.
 
 1. Download `diMail.dmg` from the [latest release](https://github.com/tommasoseita/diMail/releases/latest).
 2. Open it and drag **diMail** to **Applications**, then open it from there.
-3. At the first launch, load the JSON file of your Google client, sign in with Google and wait for the first sync.
+3. At the first launch, load the JSON file of your Google client, or open the setup link your company sent you, then sign in with Google and wait for the first sync.
 
 The [getting started guide](docs/getting-started.md) walks through each step.
 
