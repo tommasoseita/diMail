@@ -118,7 +118,7 @@ Under a message, when they apply:
 - **Testo citato** (Quoted text) shows what the message quotes; **Nascondi il testo citato** hides it again.
 - **Firma** (Signature) shows the sender's signature.
 - **Email originale** (Original email) shows the message as it was sent, with its own layout; **Torna alla conversazione** (Back to the conversation) returns. Newsletters and mailings open as the original.
-- **Mostra le immagini** (Show images) loads the remote images of that message. diMail loads them by itself only for senders you have written to and for your domains; for anyone else they stay blocked, which also stops tracking pixels.
+- **Mostra le immagini** (Show images) loads the remote images of that message. diMail loads them by itself only for senders you have written to and for your domains; for anyone else they stay blocked, which also stops tracking pixels. Images pasted into the body of an email are not remote: they come with the message and always show.
 
 Click the line with the sender's name and the time for the details: **Da** (From), **A** (To), **Cc**, **Data** (Date) and **Oggetto** (Subject), with full addresses you can select and copy.
 

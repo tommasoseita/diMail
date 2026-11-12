@@ -8,6 +8,7 @@ import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, use
 import type { Addr, MessageView, ReplyMode, ThreadDetail, ThreadSummary } from "./api";
 import { EmailFrame, inspectHtml } from "./EmailFrame";
 import { addrLabel, avatarColor, bytes, chatTime, initials } from "./format";
+import { inlineImagesOf, shownInline } from "./inlineImages";
 import { ChevronDown, Download, FileIcon, Forward, Reply, ReplyAll, Search } from "./icons";
 import { Keys } from "./Palette";
 
@@ -254,7 +255,9 @@ function ChatMessage({ m, me, onFrameReady, onUserInput, onOpenAttachment, onSav
   const text = useMemo(() => tidyPlain(clean || plainHead.trim()), [clean, plainHead]);
   const hasMore = !!m.text_plain && m.text_plain.trim().length > text.length + 20;
   const allowRemote = m.trusted_sender || images;
-  const files = m.attachments.filter((a) => !a.is_inline);
+  // Le immagini incollate nel testo si vedono nel testo, non tra gli allegati.
+  const files = m.attachments.filter((a) => !shownInline(a, html));
+  const inlineImage = useMemo(() => inlineImagesOf(m), [m.id, m.attachments]);
   const name = mine ? "Tu" : addrLabel(m.from, me);
   const recipients = [...m.to, ...m.cc].filter((a) => a.email !== me).map((a) => addrLabel(a, me));
 
@@ -295,13 +298,13 @@ function ChatMessage({ m, me, onFrameReady, onUserInput, onOpenAttachment, onSav
         {m.has_body && html && (!original || hold === "chat") && (
           <div className={original ? "bubble msg-html hold" : "bubble msg-html"}>
             <EmailFrame html={html} allowRemote={allowRemote} showQuotes={quotes} variant="chat" showSignature={signature}
-              fitWidth={bubbleMax} onEmpty={() => { setForced(true); setQuotes(true); }} onUserInput={onUserInput}
+              fitWidth={bubbleMax} inlineImage={inlineImage} onEmpty={() => { setForced(true); setQuotes(true); }} onUserInput={onUserInput}
               onReady={() => { late.current = false; onFrameReady(); setHold((h) => (h === "original" ? null : h)); }} />
           </div>
         )}
         {m.has_body && html && (original || hold === "original") && (
           <div className={original ? "embed html" : "embed html hold"}>
-            <EmailFrame html={html} allowRemote={allowRemote} showQuotes={quotes} onUserInput={onUserInput}
+            <EmailFrame html={html} allowRemote={allowRemote} showQuotes={quotes} inlineImage={inlineImage} onUserInput={onUserInput}
               onReady={() => { onFrameReady(); setHold((h) => (h === "chat" ? null : h)); }} />
           </div>
         )}

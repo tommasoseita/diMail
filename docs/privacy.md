@@ -67,6 +67,7 @@ An HTML email is untrusted content, and diMail treats it that way:
 - **Cleaned before it is stored.** The core removes scripts, event handlers, comments and links with schemes other than `http`, `https`, `mailto`, `tel` and `cid`.
 - **Shown in an isolated frame.** Each email is rendered in a sandboxed frame where scripts can't run, with a content security policy that allows nothing but inline styles and images.
 - **Remote images blocked for unknown senders.** Images hosted on a server load by themselves only when the sender is someone you have written to, or belongs to [your domains](user-guide.md#your-domains). For anyone else they stay blocked until you click **Mostra le immagini**. This stops tracking pixels from telling a stranger that you opened their email.
+- **Images inside the email always show.** An image pasted into the body is part of the message: diMail downloads it from Gmail, like an attachment, and no other server is contacted.
 - **Links leave the app.** A click on a link opens your browser (or your mail app, for `mailto:`). The email can never navigate the diMail window.
 - **Attachments are quarantined.** A downloaded attachment carries the same macOS quarantine mark as a file downloaded by a browser, so Gatekeeper checks a program before it runs.
 

@@ -65,6 +65,8 @@ Links in an email open in your default browser, and `mailto:` links in your defa
 
 diMail loads remote images only for senders you have written to and for your own domains. For anyone else, click **Mostra le immagini** (Show images) under the message. To trust a whole domain, add it in **Impostazioni** › **I miei domini** (My domains).
 
+Images pasted into the body of an email (a screenshot in the text, for example) show for every sender from version 0.1.3. One larger than 20 MB, or an SVG file, stays as a box with its file name.
+
 ## AI
 
 The messages of the AI features are explained in [AI › When something goes wrong](ai.md#when-something-goes-wrong). In short: **Prova** (Test) in **Impostazioni** › **AI** checks the key and the model and shows the provider's answer.

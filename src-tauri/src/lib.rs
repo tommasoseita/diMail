@@ -531,6 +531,12 @@ async fn save_attachment(state: State<'_, AppState>, message_id: String, part_id
     Ok(state.rt()?.save_attachment(message_id, part_id).await?.to_string_lossy().into_owned())
 }
 
+/// Un'immagine incollata nel corpo dell'email (`cid:`), come indirizzo `data:` da mostrare al suo posto.
+#[tauri::command]
+async fn inline_image(state: State<'_, AppState>, message_id: String, part_id: String) -> CmdResult<String> {
+    state.rt()?.inline_image(message_id, part_id).await
+}
+
 /// Mostra nel Finder un file salvato in Download (solo lì).
 #[tauri::command]
 fn reveal_download(app: AppHandle, path: String) -> CmdResult<()> {
@@ -784,6 +790,7 @@ pub fn run() {
             reorder_sections,
             open_attachment,
             save_attachment,
+            inline_image,
             reveal_download,
             get_signature,
             pick_attachments,

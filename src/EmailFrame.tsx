@@ -198,7 +198,7 @@ const staleDocs = new WeakMap<HTMLIFrameElement, Document | null>();
 // vuote in fondo, corpo vuoto) e si misura appena è stato letto, senza aspettare `load`, che arriva
 // solo dopo tutte le immagini, anche i loghi nascosti nella firma. Prima di quella misura il riquadro
 // non si vede e non occupa spazio (App.css, `data-fit`); le immagini che arrivano dopo lo rimisurano.
-export function EmailFrame({ html, allowRemote, showQuotes, variant = "original", showSignature = true, fitWidth, onEmpty, onReady, onUserInput }: {
+export function EmailFrame({ html, allowRemote, showQuotes, variant = "original", showSignature = true, fitWidth, inlineImage, onEmpty, onReady, onUserInput }: {
   html: string;
   allowRemote: boolean;
   showQuotes: boolean;
@@ -208,6 +208,11 @@ export function EmailFrame({ html, allowRemote, showQuotes, variant = "original"
   onEmpty?: () => void;
   /** Il riquadro si stringe sul contenuto, fino a questa larghezza (le nuvolette della conversazione). */
   fitWidth?: () => number;
+  /**
+   * Le immagini incollate nel corpo (`src="cid:…"`): l'indirizzo `data:` da mettere al loro posto,
+   * subito se già scaricata, o `null` se il messaggio non ha quell'allegato (inlineImages.ts).
+   */
+  inlineImage?: (src: string) => string | Promise<string | null> | null;
   /** Dopo ogni misura: la conversazione aspetta i riquadri prima di mostrarsi. */
   onReady?: () => void;
   /** Rotella, clic, tasti dentro l'email: la conversazione smette di seguire l'ultimo messaggio. */
@@ -222,6 +227,8 @@ export function EmailFrame({ html, allowRemote, showQuotes, variant = "original"
   readyRef.current = onReady;
   const inputRef = useRef(onUserInput);
   inputRef.current = onUserInput;
+  const inlineRef = useRef(inlineImage);
+  inlineRef.current = inlineImage;
   const src = srcdoc(html, allowRemote, showQuotes, variant, showSignature);
 
   useLayoutEffect(() => {
@@ -241,6 +248,8 @@ export function EmailFrame({ html, allowRemote, showQuotes, variant = "original"
     let poll = 0;
     let queued = 0;
     const imgs: HTMLImageElement[] = [];
+    const settling = new Set<number>();
+    const awaited = new Set<object>(); // immagini del corpo ancora in scaricamento
 
     const fit = () => {
       if (!alive || !doc || frame.contentDocument !== doc || !doc.body) return;
@@ -256,7 +265,7 @@ export function EmailFrame({ html, allowRemote, showQuotes, variant = "original"
       const css = doc.defaultView?.getComputedStyle(b);
       const h = Math.max(r.bottom, r.top + b.scrollHeight) + (parseFloat(css?.marginBottom ?? "0") || 0);
       frame.style.height = `${Math.ceil(h)}px`;
-      frame.dataset.fit = growingImages(doc) ? "img" : "ok";
+      frame.dataset.fit = growingImages(doc) || awaited.size ? "img" : "ok";
       readyRef.current?.();
     };
     const refit = () => {
@@ -282,6 +291,44 @@ export function EmailFrame({ html, allowRemote, showQuotes, variant = "original"
         img.removeEventListener("load", refit);
         img.removeEventListener("error", refit);
       });
+      settling.forEach((t) => clearInterval(t));
+      settling.clear();
+      awaited.clear();
+    };
+    // Un'immagine incollata nel corpo, appena scaricata: va al suo posto e, quando è disegnabile, il
+    // riquadro si rimisura. Con un timer: in WebKit gli eventi `load` dentro il riquadro isolato non
+    // arrivano a chi sta fuori.
+    const place = (d: Document, img: HTMLImageElement, url: string | null) => {
+      if (!alive || doc !== d) return;
+      if (!url || !img.isConnected) return fit();
+      img.src = url;
+      let tries = 0;
+      const t = window.setInterval(() => {
+        if (!img.complete && ++tries < 100) return;
+        clearInterval(t);
+        settling.delete(t);
+        fit();
+      }, 50);
+      settling.add(t);
+    };
+    const inlineImages = (d: Document) => {
+      const resolve = inlineRef.current;
+      if (!resolve) return;
+      for (const img of Array.from(d.images)) {
+        const src = img.getAttribute("src") ?? "";
+        // Quelle nella citazione o nella firma nascoste non si scaricano finché non si aprono.
+        if (!/^cid:/i.test(src) || img.getClientRects().length === 0) continue;
+        const got = resolve(src);
+        if (typeof got === "string") place(d, img, got);
+        else if (got) {
+          // Finché scarica, la conversazione aspetta (poco: ha un tetto) prima di mostrarsi.
+          const token = {};
+          awaited.add(token);
+          got.catch(() => null).then((url) => {
+            if (awaited.delete(token)) place(d, img, url);
+          });
+        }
+      }
     };
     const prepare = (d: Document) => {
       forget();
@@ -312,6 +359,7 @@ export function EmailFrame({ html, allowRemote, showQuotes, variant = "original"
         img.addEventListener("error", refit);
         imgs.push(img);
       }
+      inlineImages(d);
       fit();
     };
     /** Il documento nuovo, già letto: non quello vuoto iniziale né quello vecchio. */

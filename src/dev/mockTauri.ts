@@ -3,7 +3,7 @@
 // build non c'è. Imita i comandi del nucleo e i suoi eventi, con dati inventati.
 
 type Lbl = string;
-type Msg = { id: string; date: number; from: Person; to: Person[]; cc?: Person[]; labels: Lbl[]; html: string | null; text: string; snippet: string; attach?: string };
+type Msg = { id: string; date: number; from: Person; to: Person[]; cc?: Person[]; labels: Lbl[]; html: string | null; text: string; snippet: string; attach?: string; inline?: { cid: string; name: string }[] };
 type Th = { id: string; subject: string; msgs: Msg[] };
 type Person = { name: string; email: string; role?: string; phone?: string };
 
@@ -114,6 +114,21 @@ ne parliamo a voce la settimana prossima.</p><p class="MsoNormal">&nbsp;</p>
     { id: "m9998-0", date: now - 20 * 60_000, from: davide, to: [cc[0]], cc: [ME, ...cc.slice(1)], labels: ["INBOX", "UNREAD"], html,
       text: "Buongiorno Marco, tutto bene?\n\nNe ho parlato con la direzione.\n\nFrom: Marco Rossi\nSent: Monday\nSubject: Re: Presentazione\n\nCiao Davide",
       snippet: "Buongiorno Marco, tutto bene? Ne ho parlato con la direzione" },
+  ] });
+}
+
+// Immagini incollate nel testo (12 novembre): `cid:`, una con le misure e una senza.
+{
+  const html = `<div dir="ltr"><p>Ciao Tommaso, ti giro due segnalazioni.</p>
+<p><b>Luca Verdi, Torino</b>: questa è la sua schermata. Non riesce a prenotare il colloquio.</p>
+<p><img src="cid:ii_schermata1" alt="Verdi.jpeg" width="562" height="320"></p>
+<p><b>Sara Conti, Milano</b>: il sistema le propone orari stranissimi.</p>
+<p><img src="cid:ii_schermata2" alt="Conti.jpeg"></p><p>Puoi scrivere a tutti e due?</p></div>`;
+  const anna = PEOPLE[1];
+  threads.unshift({ id: "t9996", subject: "Due segnalazioni sulle prenotazioni", msgs: [
+    { id: "m9996-0", date: now - 5 * 60_000, from: anna, to: [ME], labels: ["INBOX"], html,
+      text: "Ciao Tommaso, ti giro due segnalazioni.\n\nLuca Verdi, Torino: questa è la sua schermata.", snippet: "Ciao Tommaso, ti giro due segnalazioni",
+      inline: [{ cid: "ii_schermata1", name: "Verdi.jpeg" }, { cid: "ii_schermata2", name: "Conti.jpeg" }] },
   ] });
 }
 
@@ -233,7 +248,11 @@ function detail(id: string) {
         ? { has_body: false, text_plain: null, html: null }
         : { has_body: true, text_plain: m.text, html: m.html }),
       cc: (m.cc ?? []).map((p) => ({ name: p.name, email: p.email })), subject: t.subject, snippet: m.snippet, label_ids: m.labels,
-      attachments: m.attach ? [{ part_id: "1", filename: m.attach, mime_type: "application/pdf", size: 184_000, content_id: null, is_inline: false }] : [],
+      attachments: [
+        ...(m.attach ? [{ part_id: "1", filename: m.attach, mime_type: "application/pdf", size: 184_000, content_id: null, is_inline: false }] : []),
+        // Come Outlook: immagini nel testo, ma dichiarate come allegati normali.
+        ...(m.inline ?? []).map((x, i) => ({ part_id: `2.${i}`, filename: x.name, mime_type: "image/jpeg", size: 96_000, content_id: x.cid, is_inline: false })),
+      ],
       trusted_sender: m.from.email.endsWith("@esempio.it") || !["news@prodotto.io", "noreply@banca-esempio.it"].includes(m.from.email),
       text_clean: m.text.split("\n\nIl giorno")[0].split("\n\nA presto,")[0].trim(),
       bulk: /^(news|noreply)/.test(m.from.email),
@@ -529,6 +548,12 @@ async function handle(cmd: string, a: Record<string, any>): Promise<unknown> {
     }
     case "open_attachment": await new Promise((r) => setTimeout(r, 700)); console.info("apro l'allegato", a.messageId, a.partId); return null;
     case "save_attachment": await new Promise((r) => setTimeout(r, 500)); return "/Users/tommaso/Downloads/preventivo.pdf";
+    case "inline_image": {
+      await new Promise((r) => setTimeout(r, slow ? 900 : 120));
+      const second = String(a.partId).endsWith(".1");
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${second ? 900 : 1124}" height="${second ? 420 : 640}"><rect width="100%" height="100%" fill="${second ? "#dbe7ff" : "#ffe9c7"}"/><text x="40" y="90" font-size="48" font-family="sans-serif" fill="#333">${second ? "Conti" : "Verdi"}: schermata</text></svg>`;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
     case "reveal_download": return null;
     case "get_signature":
       return { html: '<div dir="ltr"><b>Tommaso Seita</b><div>CEO &amp; Co-founder · Esempio</div><div><a href="https://esempio.it">esempio.it</a> · +39 333 123 4567</div></div>', text: "Tommaso Seita\nCEO & Co-founder · Esempio" };

@@ -257,6 +257,8 @@ export const api = {
   openAttachment: (messageId: string, partId: string) => invoke<void>("open_attachment", { messageId, partId }),
   /** Copia l'allegato in Download: restituisce il percorso. */
   saveAttachment: (messageId: string, partId: string) => invoke<string>("save_attachment", { messageId, partId }),
+  /** Un'immagine nel corpo dell'email (`cid:`), come indirizzo `data:`. */
+  inlineImage: (messageId: string, partId: string) => invoke<string>("inline_image", { messageId, partId }),
   signature: () => invoke<Signature | null>("get_signature"),
   pickAttachments: () => invoke<OutAttachment[]>("pick_attachments"),
   fileInfo: (paths: string[]) => invoke<OutAttachment[]>("file_info", { paths }),

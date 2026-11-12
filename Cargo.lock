@@ -914,7 +914,7 @@ dependencies = [
 
 [[package]]
 name = "dimail"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "dimail-core",
@@ -935,7 +935,7 @@ dependencies = [
 
 [[package]]
 name = "dimail-core"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "ammonia",
  "anyhow",

@@ -143,6 +143,30 @@ pub async fn fetch<G: GmailApi>(ctx: &Ctx<G>, cache_dir: &Path, message_id: &str
     Ok(AttachmentFile { path, filename: row.filename, mime_type: row.mime_type })
 }
 
+/// Oltre questa misura un'immagine nel corpo dell'email non si carica al suo posto (resta un allegato).
+pub const INLINE_IMAGE_MAX: u64 = 20 * 1024 * 1024;
+
+/// Il tipo dell'immagine, se è un'immagine che si può mostrare nel corpo dell'email. Outlook a volte
+/// dichiara `application/octet-stream`: allora conta l'estensione. SVG no: è un documento, non una foto.
+fn inline_image_mime(mime: &str, filename: &str) -> Option<String> {
+    let declared = mime.split(';').next().unwrap_or("").trim().to_ascii_lowercase();
+    let mime = if declared.starts_with("image/") { declared } else { guess_mime(filename).to_owned() };
+    (mime.starts_with("image/") && mime != "image/svg+xml").then_some(mime)
+}
+
+/// Un'immagine incollata nel corpo dell'email (`<img src="cid:…">`), come indirizzo `data:` da
+/// mettere al suo posto (12 novembre). Solo immagini, e non enormi.
+pub fn image_data_url(file: &AttachmentFile) -> Result<String> {
+    use base64::Engine;
+    let mime = inline_image_mime(&file.mime_type, &file.filename).ok_or_else(|| Error::other("l'allegato non è un'immagine"))?;
+    let size = std::fs::metadata(&file.path).map_err(|e| Error::other(format!("immagine non letta: {e}")))?.len();
+    if size > INLINE_IMAGE_MAX {
+        return Err(Error::other("immagine troppo grande per mostrarla nel testo"));
+    }
+    let bytes = std::fs::read(&file.path).map_err(|e| Error::other(format!("immagine non letta: {e}")))?;
+    Ok(format!("data:{mime};base64,{}", base64::engine::general_purpose::STANDARD.encode(bytes)))
+}
+
 /// Il tipo MIME dall'estensione, per i file del Mac allegati alle email.
 pub fn guess_mime(name: &str) -> &'static str {
     let ext = name.rsplit_once('.').map(|(_, e)| e.to_ascii_lowercase()).unwrap_or_default();
@@ -236,5 +260,21 @@ mod tests {
         std::fs::create_dir_all(&out).unwrap();
         assert_eq!(copy_to(&f, &out).unwrap().file_name().unwrap(), "Fattura.pdf");
         assert_eq!(copy_to(&f, &out).unwrap().file_name().unwrap(), "Fattura (2).pdf");
+    }
+
+    #[test]
+    fn only_images_become_data_urls() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = |name: &str, mime: &str| {
+            let path = dir.path().join(name);
+            std::fs::write(&path, b"hi").unwrap();
+            AttachmentFile { path, filename: name.into(), mime_type: mime.into() }
+        };
+        assert_eq!(image_data_url(&file("foto.jpeg", "image/jpeg; name=foto.jpeg")).unwrap(), "data:image/jpeg;base64,aGk=");
+        // Outlook: tipo generico, conta l'estensione.
+        assert_eq!(image_data_url(&file("image001.png", "application/octet-stream")).unwrap(), "data:image/png;base64,aGk=");
+        assert!(image_data_url(&file("fattura.pdf", "application/pdf")).is_err());
+        assert!(image_data_url(&file("pagina.html", "text/html")).is_err());
+        assert!(image_data_url(&file("disegno.svg", "image/svg+xml")).is_err());
     }
 }

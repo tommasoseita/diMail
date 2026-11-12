@@ -420,6 +420,12 @@ impl<G: GmailApi> AccountRuntime<G> {
         crate::attachments::fetch(&self.ctx, &dir, &message_id, &part_id).await
     }
 
+    /// Un'immagine nel corpo dell'email (`cid:`), come indirizzo `data:`: scaricata la prima volta.
+    pub async fn inline_image(&self, message_id: String, part_id: String) -> Result<String> {
+        let file = self.attachment(message_id, part_id).await?;
+        crate::attachments::image_data_url(&file)
+    }
+
     /// Una copia in Download. Restituisce dove.
     pub async fn save_attachment(&self, message_id: String, part_id: String) -> Result<std::path::PathBuf> {
         let file = self.attachment(message_id, part_id).await?;

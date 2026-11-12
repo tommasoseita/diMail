@@ -2,6 +2,12 @@
 
 All notable changes to diMail. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [semantic versioning](https://semver.org).
 
+## 0.1.3
+
+### Fixed
+
+- **Images pasted into the body of an email now show.** Before, a screenshot or photo placed in the text of a message appeared as an empty box with the file name. diMail now downloads these images from Gmail when you open the conversation and puts them in place, for any sender: they arrive with the email, so they can't be used to track you. An image shown in the text is no longer listed among the attachments too.
+
 ## 0.1.2
 
 ### Fixed
