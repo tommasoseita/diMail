@@ -171,7 +171,7 @@ The result replaces your text, with the note **Scritto dall'AI: rileggilo prima 
 - **Every word must match, by its beginning.** `prev` finds "preventivo"; `anna prev` finds the messages that have both.
 - **Accents and capitals don't matter.** `lunedi` finds "lunedì".
 - **It looks in** the subject, the sender, the recipients, the text of the messages (not the quoted part) and the names of the attachments.
-- **Addresses.** Type an address or a piece of it: `andrea.rota` finds andrea.rota@acme.it, and `acme.it` finds everyone at that domain.
+- **Addresses.** Type an address or a piece of it: `sara.conti` finds sara.conti@acme.it, and `acme.it` finds everyone at that domain.
 - **No operators yet.** Gmail's `from:`, `has:attachment` and the like are not understood.
 
 <kbd>↩</kbd> or <kbd>↓</kbd> moves to the results; <kbd>Esc</kbd> in the field clears the search and returns to where you were.

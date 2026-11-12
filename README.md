@@ -14,6 +14,8 @@ and AI helps without deciding for you.
 [User guide](docs/user-guide.md) ·
 [Privacy](docs/privacy.md)
 
+<img src="docs/images/inbox.jpg" alt="diMail's inbox: threads as a to-do list, with the contact bar on the right" width="860">
+
 </div>
 
 ---
@@ -36,6 +38,8 @@ and AI helps without deciding for you.
 - **AI writing with <kbd>⌘J</kbd>.** In the composer, the AI writes the reply or turns your rough notes into an email. You read it before it goes.
 - **Search as you type**, over the mail on your Mac, by word prefix and by address.
 - **Contact bar, command palette, zoom, light and dark themes**, and the number of conversations in Important on the Dock icon.
+
+<p align="center"><img src="docs/images/ai-reply.jpg" alt="A reply written by the AI from two rough notes, in the composer under the conversation" width="760"></p>
 
 ## Requirements
 
