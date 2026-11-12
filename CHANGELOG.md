@@ -2,6 +2,16 @@
 
 All notable changes to diMail. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [semantic versioning](https://semver.org).
 
+## 0.1.2
+
+### Fixed
+
+- **Restarting after an update no longer leaves two diMail icons in the Dock.** diMail now closes and reopens, instead of starting a second copy next to the one that is closing. An update from 0.1.1 or earlier still shows the second icon once, because the restart is done by the version being replaced.
+
+### Added
+
+- **Riavvia diMail** (Restart diMail) in the command palette.
+
 ## 0.1.1
 
 ### Added

@@ -214,7 +214,7 @@ The palette lists the commands that apply where you are, each with its shortcut.
 
 diMail looks for a new version shortly after it starts and every 6 hours, downloads it in the background and verifies its signature. When it is ready, a box at the bottom left says **diMail 0.2.0 è pronta** (is ready), with **Riavvia** (Restart).
 
-diMail never restarts by itself. While you have an email open or one about to leave, **Riavvia** asks you to send or close it first. If you don't restart, the new version starts the next time you open diMail.
+diMail never restarts by itself. While you have an email open or one about to leave, **Riavvia** asks you to send or close it first. If you don't restart, the new version starts the next time you open diMail. The palette also has **Riavvia diMail** (Restart diMail), which closes and reopens the app at any time.
 
 ## Keyboard shortcuts
 

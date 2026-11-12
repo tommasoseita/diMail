@@ -217,6 +217,42 @@ async fn apply_client(state: &AppState, client: OAuthClient) -> CmdResult<Google
     Ok(info)
 }
 
+/// Riavvio dopo un aggiornamento (12 novembre). Il riavvio di Tauri apre una nuova istanza (`open -n`)
+/// mentre questa è ancora viva, e il Dock la mostra come una seconda icona accanto a quella fissata.
+/// Qui un piccolo processo aspetta che diMail sia uscita e poi la riapre normalmente: il Dock la
+/// riconosce come la stessa app.
+#[tauri::command]
+fn restart_app(app: tauri::AppHandle) {
+    let bundle = std::env::current_exe().ok().and_then(|exe| {
+        let macos = exe.parent()?;
+        let bundle = macos.parent()?.parent()?;
+        (macos.file_name()? == "MacOS" && bundle.extension()? == "app").then(|| bundle.to_path_buf())
+    });
+    let Some(bundle) = bundle else {
+        // Fuori da un'app (sviluppo): il riavvio di Tauri.
+        app.restart();
+    };
+    // Al massimo 30 secondi di attesa, poi riapre comunque.
+    let script = r#"i=0; while kill -0 "$1" 2>/dev/null && [ "$i" -lt 300 ]; do sleep 0.1; i=$((i+1)); done; exec /usr/bin/open "$2""#;
+    let spawned = std::process::Command::new("/bin/sh")
+        .args(["-c", script, "sh", &std::process::id().to_string()])
+        .arg(&bundle)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn();
+    match spawned {
+        Ok(_) => {
+            tracing::info!("riavvio: diMail si chiude e si riapre");
+            app.exit(0);
+        }
+        Err(e) => {
+            tracing::warn!(error = %e, "riavvio: non riesco ad aspettare la chiusura, uso quello di Tauri");
+            app.restart();
+        }
+    }
+}
+
 /// Il link di configurazione del client in uso, da mandare ai colleghi (Impostazioni → Account Google).
 #[tauri::command]
 fn client_setup_link(state: State<'_, AppState>) -> CmdResult<String> {
@@ -611,7 +647,6 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(external_links())
         .manage(state)
@@ -704,6 +739,7 @@ pub fn run() {
             client_setup_link,
             setup_link_info,
             apply_setup_link,
+            restart_app,
             list_threads,
             count_threads,
             peek_thread,

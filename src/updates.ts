@@ -2,7 +2,7 @@
 // all'avvio e poi ogni sei ore, la scarica in background e ne verifica la firma (plugin updater di
 // Tauri, chiave pubblica in tauri.conf.json). Poi lo dice in basso a sinistra: «diMail 0.3.0 è
 // pronta · Riavvia». Non si riavvia mai da sola: le bozze nel composer vivono solo in memoria.
-import { relaunch } from "@tauri-apps/plugin-process";
+import { invoke } from "@tauri-apps/api/core";
 import { check } from "@tauri-apps/plugin-updater";
 import { useEffect, useState } from "react";
 import { describe, report } from "./diagnostics";
@@ -47,5 +47,7 @@ export function useUpdate(): { version: string | null; restart: () => Promise<vo
     };
   }, []);
 
-  return { version, restart: relaunch };
+  // Non il riavvio di Tauri, che apre una seconda istanza e raddoppia l'icona nel Dock: diMail si
+  // chiude e si riapre (src-tauri, restart_app).
+  return { version, restart: () => invoke<void>("restart_app") };
 }

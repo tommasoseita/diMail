@@ -946,6 +946,7 @@ export function Workspace({ account, needsLogin, onRelogin }: { account: Account
       { id: "palette", title: "Comandi", group: "App", keys: ["mod+k"], hidden: true, run: () => setOverlay("palette") },
       { id: "help", title: "Scorciatoie", group: "App", keys: ["?"], keywords: ["aiuto", "tasti"], run: () => setOverlay("help") },
       { id: "contact", title: "Barra del contatto", group: "App", keys: ["i"], keywords: ["persona", "info"], run: toggleContact },
+      { id: "restart", title: "Riavvia diMail", group: "App", keys: [], keywords: ["riapri", "restart", "aggiornamento"], run: restartForUpdate },
       { id: "rail", title: "Barra a sinistra", group: "App", keys: ["mod+\\"], run: toggleRail },
       { id: "sync", title: "Sincronizza ora", group: "App", keys: [], keywords: ["aggiorna"], run: syncNow },
       { id: "settings", title: "Impostazioni", group: "App", keys: ["mod+,"], keywords: ["preferenze", "domini", "client", "google"], run: () => setOverlay("settings") },
@@ -957,7 +958,7 @@ export function Workspace({ account, needsLogin, onRelogin }: { account: Account
       { id: "theme-light", title: "Tema: chiaro", group: "App", keys: [], run: () => setTheme("light") },
       { id: "theme-dark", title: "Tema: scuro", group: "App", keys: [], run: () => setTheme("dark") },
     ];
-  }, [S, act, askSnooze, closeThread, currentThread, cycleTab, focusSearch, go, move, moveToOtherTab, newSection, openThread, setTheme, startCompose, syncNow, targets, toggleContact, toggleRail, toggleTheme, travel, undoLast, viewKind, viewLabel]);
+  }, [S, act, askSnooze, closeThread, currentThread, cycleTab, focusSearch, go, move, moveToOtherTab, newSection, openThread, restartForUpdate, setTheme, startCompose, syncNow, targets, toggleContact, toggleRail, toggleTheme, travel, undoLast, viewKind, viewLabel]);
 
   const commandsRef = useLatest(commands);
   const ctx: Context = openId ? "thread" : "list";
